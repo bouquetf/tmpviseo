@@ -1,0 +1,66 @@
+---
+- hosts: piwik
+  remote_user: root
+  
+  tasks:
+#  - name: reboot
+#    command: shutdown -r now "Ansible updates triggered"
+#    async: 0
+#    poll: 0
+#    ignore_errors: true
+
+#  - name: waiting for server to come back
+#    local_action: wait_for host={{ piwik }}
+#    sudo: false
+
+  - name: install nginx
+    apt: name=nginx update_cache=yes
+
+  - name: install mysql
+    apt: name=mariadb-server update_cache=yes
+
+  - name: install php
+    apt: name=php5 update_cache=yes
+
+  - name: install php-fpm
+    apt: name=php5-fpm update_cache=yes
+
+  - name: install php-mysql
+    apt: name=php5-mysql update_cache=yes
+
+  - name: install phpgd
+    apt: name=php5-gd update_cache=yes
+
+  - name: install unzip
+    apt: name=unzip update_cache=yes
+
+  - name: download piwik
+    unarchive: src=files/piwik-2.14.3.zip dest=/var/www
+
+  - name: conf piwik
+    copy: src=files/config.ini.php dest=/var/www/piwik/config
+
+  - name: conf nginx
+    copy: src=files/nginx.php dest=/etc/nginx
+
+  - copy: src=files/php-fpm.conf dest=/etc/php5/fpm
+
+  - copy: src=files/php.ini dest=/etc/php5/fpm
+
+  - copy: src=files/www.conf dest=/etc/php5/fpm/pool.d
+
+  - copy: src=files/my.cnf dest=/etc/mysql
+
+  - copy: src=ca-certificates.crt dest=/etc/ssl/certs
+  
+  - copy: src=intermediate.crt dest=/etc/ssl/certs
+
+  - copy: src=piwik dest=/etc/nginx/sites-available
+
+  - file: src=/etc/nginx/sites-available/piwik dest=/etc/nginx/sites-enabled/piwik 
+
+
+#    - configmysql
+#    - configphp
+#    - configothers
+#    - ssl
